@@ -2144,23 +2144,45 @@ static void export_file_list(void)
 		unlink(g_tmpfpath);
 }
 
+static inline short color_component_from_hex(uint32_t color, char component) {
+  switch(component) {
+    case 'r':
+      return ((color >> 16) & 0xff) / 255.0 * 1000.;
+    case 'g':
+      return ((color >> 8) & 0xff) / 255.0 * 1000.;
+    case 'b':
+      return ((color >> 0) & 0xff) / 255.0 * 1000.;
+  }
+
+  return 0;
+}
+
+static inline void set_color(short id, uint32_t hex) {
+  init_color(id, color_component_from_hex(hex, 'r'),
+                 color_component_from_hex(hex, 'g'),
+                 color_component_from_hex(hex, 'b'));
+  init_pair(id, id, -1);
+}
+
 static bool init_fcolors(void)
 {
-	char *f_colors = getenv(env_cfg[NNN_FCOLORS]);
-
-	if (!f_colors || !*f_colors)
-		f_colors = gcolors;
-
+	char *f_colors = gcolors;
 	for (uchar_t id = C_BLK; *f_colors && id <= C_UND; ++id) {
 		fcolors[id] = xchartohex(*f_colors) << 4;
-		if (*++f_colors) {
-			fcolors[id] += xchartohex(*f_colors);
-			if (fcolors[id])
-				init_pair(id, fcolors[id], -1);
-		} else
-			return FALSE;
 		++f_colors;
 	}
+
+        set_color(C_BLK, 0xf0c6c6);
+        set_color(C_DIR, 0xa6da95);
+        set_color(C_EXE, 0xeed49f);
+        set_color(C_FIL, 0xcad3f5);
+        set_color(C_HRD, 0xed8796);
+        set_color(C_LNK, 0x8bd5ca);
+        set_color(C_MIS, 0x939ab7);
+        set_color(C_ORP, 0xb7bdf8);
+        set_color(C_PIP, 0xf5a97f);
+        set_color(C_SOC, 0x91d7e3);
+        set_color(C_UND, 0xee99a0);
 
 	return TRUE;
 }
